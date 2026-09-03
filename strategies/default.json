@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "name": "Auto",
+  "description": "Adaptive strategy selected by the strategy engine.",
+  "mode": "auto",
+  "targets": [],
+  "engine": {
+    "adapter": "native",
+    "fallbackAdapter": "compatibility"
+  },
+  "selection": {
+    "probeBeforeApply": true,
+    "rememberPerNetwork": true,
+    "maxCandidates": 12,
+    "scoreWeights": {
+      "success": 0.55,
+      "latency": 0.2,
+      "stability": 0.2,
+      "collateral": 0.05
+    }
+  }
+}

@@ -10,7 +10,7 @@ public sealed class EngineService
 {
     private const string Version = "1.0.5";
     private const string ZipUrl = "https://github.com/bol-van/zapret2/releases/download/v1.0.5/zapret2-v1.0.5.zip";
-    private const string ZipSha256 = "d73a4c57dad0f20f4737154c3d9ab8fca717e75f1a21fa69";
+    private const string ZipSha256 = "d73a4c57dad0f20f473aa62ed950505f0737154c3d9ab8fca717e75f1a21fa69";
     private static readonly HttpClient Http = new() { Timeout = TimeSpan.FromMinutes(5) };
     private readonly string _root = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Zapret2Ultra");
     private Process? _process;
@@ -18,7 +18,6 @@ public sealed class EngineService
     public bool IsRunning => _process is { HasExited: false };
     public string EngineDirectory => Path.Combine(_root, "engine", $"v{Version}");
     public string EnginePath => Path.Combine(EngineDirectory, "winws2.exe");
-
     public event Action<string>? Log;
 
     public async Task EnsureInstalledAsync(CancellationToken cancellationToken = default)
@@ -26,7 +25,6 @@ public sealed class EngineService
         if (File.Exists(EnginePath)) return;
         Directory.CreateDirectory(EngineDirectory);
         var archive = Path.Combine(_root, $"zapret2-v{Version}.zip");
-        Directory.CreateDirectory(_root);
         Log?.Invoke($"Загрузка winws2 v{Version}…");
         await using (var source = await Http.GetStreamAsync(ZipUrl, cancellationToken))
         await using (var target = File.Create(archive))

@@ -1,0 +1,5 @@
+{
+  "Name": "Aggressive",
+  "EngineProfile": "aggressive",
+  "Description": "Stronger TLS/QUIC profile for difficult networks."
+}

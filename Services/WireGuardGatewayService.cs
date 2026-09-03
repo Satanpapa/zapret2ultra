@@ -19,9 +19,10 @@ public sealed class WireGuardGatewayService
     private const string ClientIp = "10.66.0.2/32";
     private readonly string _root = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Zapret2Ultra", "wireguard");
     private string ConfigPath => Path.Combine(_root, $"{TunnelName}.conf");
+    private string ClientPath => Path.Combine(_root, "phone.conf");
+
     public string? LastClientConfig { get; private set; }
     public BitmapImage? LastQr { get; private set; }
-
     public bool IsAdministrator => new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator);
 
     public async Task<WireGuardGatewayInfo> SetupAsync(int port, string endpoint)
@@ -30,6 +31,7 @@ public sealed class WireGuardGatewayService
         var wireguardExe = FindWireGuardExe();
         var wgExe = FindWgExe();
         if (wireguardExe is null || wgExe is null) return new(false, false, GetLanAddress(), port, null, null, "Не найден полный WireGuard for Windows. Нужны wireguard.exe и wg.exe.");
+        if (port is < 1 or > 65535) throw new ArgumentOutOfRangeException(nameof(port));
         Directory.CreateDirectory(_root);
 
         var serverPrivate = await GetOrCreateKeyAsync(wgExe, "server.key");
@@ -40,9 +42,8 @@ public sealed class WireGuardGatewayService
         var server = $"[Interface]\nPrivateKey = {serverPrivate}\nAddress = {GatewayIp}\nListenPort = {port}\n\n[Peer]\nPublicKey = {clientPublic}\nAllowedIPs = {ClientIp}\n";
         var client = $"[Interface]\nPrivateKey = {clientPrivate}\nAddress = {ClientIp}\nDNS = 1.1.1.1\n\n[Peer]\nPublicKey = {serverPublic}\nAllowedIPs = 0.0.0.0/0\nEndpoint = {endpoint}:{port}\nPersistentKeepalive = 25\n";
         await File.WriteAllTextAsync(ConfigPath, server, Encoding.UTF8);
-        var clientPath = Path.Combine(_root, "phone.conf");
-        await File.WriteAllTextAsync(clientPath, client, Encoding.UTF8);
-        SetHidden(ConfigPath); SetHidden(clientPath); SetHidden(Path.Combine(_root, "server.key")); SetHidden(Path.Combine(_root, "phone.key"));
+        await File.WriteAllTextAsync(ClientPath, client, Encoding.UTF8);
+        ProtectSecretFile(ConfigPath); ProtectSecretFile(ClientPath); ProtectSecretFile(Path.Combine(_root, "server.key")); ProtectSecretFile(Path.Combine(_root, "phone.key"));
 
         await RunWireGuardAsync(wireguardExe, "/uninstalltunnelservice", TunnelName, true);
         var install = await ProcessRunner.RunAsync(wireguardExe, new[] { "/installtunnelservice", ConfigPath });
@@ -62,8 +63,7 @@ public sealed class WireGuardGatewayService
         if (!IsAdministrator) throw new InvalidOperationException("Для остановки шлюза нужны права администратора.");
         var wireguardExe = FindWireGuardExe();
         if (wireguardExe is not null) await RunWireGuardAsync(wireguardExe, "/uninstalltunnelservice", TunnelName, true);
-        var cleanup = await ProcessRunner.RunAsync("powershell.exe", new[] { "-NoProfile", "-Command", $"Remove-NetNat -Name '{NatName}' -ErrorAction SilentlyContinue; Remove-NetFirewallRule -DisplayName '{FirewallName}' -ErrorAction SilentlyContinue" });
-        if (cleanup.ExitCode != 0 && !string.IsNullOrWhiteSpace(cleanup.StdErr)) throw new InvalidOperationException(cleanup.StdErr.Trim());
+        await ProcessRunner.RunAsync("powershell.exe", new[] { "-NoProfile", "-Command", $"Remove-NetNat -Name '{NatName}' -ErrorAction SilentlyContinue; Remove-NetFirewallRule -DisplayName '{FirewallName}' -ErrorAction SilentlyContinue" });
     }
 
     public async Task<WireGuardGatewayInfo> InspectAsync(int port)
@@ -80,7 +80,7 @@ public sealed class WireGuardGatewayService
 
     private async Task ConfigureNatAsync(int port)
     {
-        var script = $"$i=Get-NetIPInterface -InterfaceAlias '{TunnelName}' -AddressFamily IPv4 -ErrorAction Stop; Set-NetIPInterface -InterfaceAlias '{TunnelName}' -AddressFamily IPv4 -Forwarding Enabled; Get-NetIPInterface -AddressFamily IPv4 | Where-Object {{$_.ConnectionState -eq 'Connected' -and $_.InterfaceAlias -ne '{TunnelName}'}} | ForEach-Object {{Set-NetIPInterface -InterfaceIndex $_.ifIndex -Forwarding Enabled -ErrorAction SilentlyContinue}}; if (-not (Get-NetNat -Name '{NatName}' -ErrorAction SilentlyContinue)) {{New-NetNat -Name '{NatName}' -InternalIPInterfaceAddressPrefix '{GatewayCidr}'}}; if (-not (Get-NetFirewallRule -DisplayName '{FirewallName}' -ErrorAction SilentlyContinue)) {{New-NetFirewallRule -DisplayName '{FirewallName}' -Direction Inbound -Protocol UDP -LocalPort {port} -Action Allow -Profile Any}}";
+        var script = $"$ErrorActionPreference='Stop'; $i=Get-NetIPInterface -InterfaceAlias '{TunnelName}' -AddressFamily IPv4; Set-NetIPInterface -InterfaceAlias '{TunnelName}' -AddressFamily IPv4 -Forwarding Enabled; Get-NetIPInterface -AddressFamily IPv4 | Where-Object {{$_.ConnectionState -eq 'Connected' -and $_.InterfaceAlias -ne '{TunnelName}'}} | ForEach-Object {{Set-NetIPInterface -InterfaceIndex $_.ifIndex -Forwarding Enabled -ErrorAction SilentlyContinue}}; if (-not (Get-NetNat -Name '{NatName}' -ErrorAction SilentlyContinue)) {{New-NetNat -Name '{NatName}' -InternalIPInterfaceAddressPrefix '{GatewayCidr}'}}; if (-not (Get-NetFirewallRule -DisplayName '{FirewallName}' -ErrorAction SilentlyContinue)) {{New-NetFirewallRule -DisplayName '{FirewallName}' -Direction Inbound -Protocol UDP -LocalPort {port} -Action Allow -Profile Any}}";
         var result = await ProcessRunner.RunAsync("powershell.exe", new[] { "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", script });
         if (result.ExitCode != 0) throw new InvalidOperationException($"Не удалось настроить NAT/Firewall: {result.StdErr.Trim()}");
     }
@@ -140,7 +140,7 @@ public sealed class WireGuardGatewayService
         return null;
     }
 
-    private static void SetHidden(string path)
+    private static void ProtectSecretFile(string path)
     {
         try { File.SetAttributes(path, File.GetAttributes(path) | FileAttributes.Hidden); } catch { }
     }

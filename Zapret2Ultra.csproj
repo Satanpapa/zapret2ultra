@@ -10,7 +10,6 @@
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <AssemblyName>Zapret2Ultra</AssemblyName>
     <RootNamespace>Zapret2Ultra</RootNamespace>
-    <ApplicationIcon>Assets\app.ico</ApplicationIcon>
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
@@ -21,7 +20,6 @@
     <WarningsAsErrors>true</WarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
-    <None Update="Assets\app.ico" CopyToOutputDirectory="PreserveNewest" />
     <None Update="strategies\*.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

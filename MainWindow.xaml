@@ -1,36 +1,71 @@
-<Window x:Class="Zapret2Ultra.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="Zapret2Ultra" Width="1180" Height="760" MinWidth="900" MinHeight="600" WindowStartupLocation="CenterScreen" Background="{StaticResource Bg}">
-<Grid Margin="24">
-<Grid.ColumnDefinitions><ColumnDefinition Width="220"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
-<StackPanel Grid.Column="0">
-<TextBlock Text="ZAPRET2ULTRA" FontSize="22" FontWeight="Bold" Margin="8,8,0,30"/>
-<Button Content="●  Главная" Click="Home_Click"/>
-<Button Content="⚡  Стратегии" Click="Strategies_Click"/>
-<Button Content="▣  VPN-шлюз" Click="Vpn_Click"/>
-<Button Content="⌁  Диагностика" Click="Diagnostics_Click"/>
-<Button Content="⚙  Настройки" Click="Settings_Click"/>
-<Border Background="#11151D" CornerRadius="12" Padding="12" Margin="4,28,4,0"><StackPanel><TextBlock Text="Система" Foreground="{StaticResource Muted}"/><TextBlock x:Name="SystemStatus" Text="Готово" FontWeight="Bold" Margin="0,5,0,0"/></StackPanel></Border>
-</StackPanel>
-<Grid Grid.Column="1" Margin="28,0,0,0">
-<StackPanel x:Name="HomePage">
-<TextBlock Text="Добро пожаловать" FontSize="34" FontWeight="Bold"/>
-<TextBlock Text="DPI bypass нового поколения · локально · без VPS" Foreground="{StaticResource Muted}" FontSize="15" Margin="0,4,0,28"/>
-<Border Background="{StaticResource Panel}" CornerRadius="20" Padding="28"><StackPanel>
-<StackPanel Orientation="Horizontal"><Ellipse Width="12" Height="12" Fill="{StaticResource Danger}" Margin="0,0,10,0"/><TextBlock Text="Обход выключен" FontSize="16" FontWeight="SemiBold"/></StackPanel>
-<TextBlock Text="Запускает выбранный движок и применяет активную стратегию." Foreground="{StaticResource Muted}" Margin="0,10,0,20"/>
-<Button Content="▶  Включить обход" Background="{StaticResource Accent}" Click="Toggle_Click" HorizontalAlignment="Left"/>
-</StackPanel></Border>
-<UniformGrid Columns="3" Margin="0,18,0,0">
-<Border Background="{StaticResource Panel}" CornerRadius="14" Padding="18" Margin="0,0,8,0"><StackPanel><TextBlock Text="Активная стратегия" Foreground="{StaticResource Muted}"/><TextBlock x:Name="StrategyText" Text="Auto" FontSize="19" FontWeight="Bold" Margin="0,6,0,0"/></StackPanel></Border>
-<Border Background="{StaticResource Panel}" CornerRadius="14" Padding="18" Margin="8,0"><StackPanel><TextBlock Text="Состояние VPN" Foreground="{StaticResource Muted}"/><TextBlock x:Name="VpnText" Text="Выключен" FontSize="19" FontWeight="Bold" Margin="0,6,0,0"/></StackPanel></Border>
-<Border Background="{StaticResource Panel}" CornerRadius="14" Padding="18" Margin="8,0,0,0"><StackPanel><TextBlock Text="Режим" Foreground="{StaticResource Muted}"/><TextBlock Text="Windows gateway" FontSize="19" FontWeight="Bold" Margin="0,6,0,0"/></StackPanel></Border>
-</UniformGrid>
-</StackPanel>
-<StackPanel x:Name="VpnPage" Visibility="Collapsed">
-<TextBlock Text="VPN-шлюз" FontSize="34" FontWeight="Bold"/><TextBlock Text="Подключайте телефон к этому ПК и маршрутизируйте его трафик через локальный обход." Foreground="{StaticResource Muted}" FontSize="15" Margin="0,4,0,24"/>
-<Border Background="{StaticResource Panel}" CornerRadius="20" Padding="24"><StackPanel>
-<TextBlock Text="WireGuard gateway" FontSize="20" FontWeight="Bold"/><TextBlock Text="Сервер работает на этом ПК. Zapret2Ultra остаётся точкой выхода в интернет." Foreground="{StaticResource Muted}" Margin="0,8,0,18"/>
-<StackPanel Orientation="Horizontal"><TextBlock Text="Порт" VerticalAlignment="Center"/><TextBox x:Name="VpnPort" Text="51820" Width="100" Margin="12,0" Padding="8"/><Button Content="Создать конфигурацию" Click="CreateVpn_Click"/></StackPanel>
-<TextBlock x:Name="VpnInfo" Text="После генерации здесь появятся адрес, ключи и QR-конфигурация клиента." Foreground="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,18,0,0"/>
-</StackPanel></Border>
-</StackPanel>
-</Grid></Grid></Window>
+<Window x:Class="Zapret2Ultra.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="Zapret2Ultra" Width="1180" Height="760" MinWidth="980" MinHeight="660" Background="{StaticResource Bg}" WindowStartupLocation="CenterScreen">
+  <Grid>
+    <Grid.ColumnDefinitions><ColumnDefinition Width="236"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+    <Border Grid.Column="0" Background="#0D1016" BorderBrush="#1B2230" BorderThickness="0,0,1,0">
+      <DockPanel>
+        <StackPanel DockPanel.Dock="Top" Margin="22,24,22,10">
+          <TextBlock Text="ZAPRET2ULTRA" FontSize="22" FontWeight="ExtraBold" LetterSpacing="1.2"/>
+          <TextBlock Text="adaptive network toolkit" Foreground="{StaticResource Muted}" FontSize="11" Margin="1,2,0,0"/>
+        </StackPanel>
+        <StackPanel Margin="14,12">
+          <Button x:Name="HomeButton" Click="Nav_Click" Tag="Home" HorizontalContentAlignment="Left" FontSize="14">⌂  Главная</Button>
+          <Button Click="Nav_Click" Tag="Strategies" HorizontalContentAlignment="Left" FontSize="14">◈  Стратегии</Button>
+          <Button Click="Nav_Click" Tag="Gateway" HorizontalContentAlignment="Left" FontSize="14">⌁  VPN-шлюз</Button>
+          <Button Click="Nav_Click" Tag="Diagnostics" HorizontalContentAlignment="Left" FontSize="14">⌁  Диагностика</Button>
+          <Button Click="Nav_Click" Tag="Settings" HorizontalContentAlignment="Left" FontSize="14">⚙  Настройки</Button>
+        </StackPanel>
+        <Border DockPanel.Dock="Bottom" Margin="14" Padding="14" Background="{StaticResource Surface}" CornerRadius="14">
+          <StackPanel>
+            <TextBlock Text="ENGINE" FontSize="10" Foreground="{StaticResource Muted}" FontWeight="Bold"/>
+            <TextBlock x:Name="EngineVersion" Text="winws2 • v1.0.5" FontSize="13" FontWeight="SemiBold" Margin="0,4,0,0"/>
+            <TextBlock x:Name="AdminText" Text="Проверка прав…" FontSize="11" Foreground="{StaticResource Muted}" Margin="0,5,0,0"/>
+          </StackPanel>
+        </Border>
+      </DockPanel>
+    </Border>
+
+    <Grid Grid.Column="1" Margin="30">
+      <Grid x:Name="HomePage">
+        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+        <DockPanel Grid.Row="0" Margin="0,4,0,24">
+          <StackPanel DockPanel.Dock="Left"><TextBlock Text="Главная" FontSize="30" FontWeight="Bold"/><TextBlock Text="Один центр управления движком, стратегиями и локальным VPN-шлюзом." Foreground="{StaticResource Muted}" Margin="0,5,0,0"/></StackPanel>
+          <Border DockPanel.Dock="Right" Background="#142019" CornerRadius="16" Padding="15,9"><StackPanel Orientation="Horizontal"><Ellipse Width="9" Height="9" Fill="{StaticResource Success}" Margin="0,0,8,0"/><TextBlock x:Name="SystemStatus" Text="Готово" FontWeight="SemiBold"/></StackPanel></Border>
+        </DockPanel>
+        <Border Grid.Row="1" Background="{StaticResource Surface}" CornerRadius="20" Padding="24" Margin="0,0,0,20">
+          <Grid>
+            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="290"/></Grid.ColumnDefinitions>
+            <StackPanel><TextBlock Text="Защищённый режим" Foreground="{StaticResource Muted}"/><TextBlock x:Name="MainState" Text="Обход выключен" FontSize="28" FontWeight="Bold" Margin="0,6,0,5"/><TextBlock Text="winws2 + WinDivert • автоматическая стратегия" Foreground="{StaticResource Muted}"/><StackPanel Orientation="Horizontal" Margin="-4,18,0,0"><Button x:Name="EngineToggle" Click="EngineToggle_Click" Background="{StaticResource Accent}" FontWeight="Bold">▶  Включить обход</Button><Button Click="AutoPick_Click">✦  Подобрать стратегию</Button></StackPanel></StackPanel>
+            <Border Grid.Column="1" Background="#151A24" CornerRadius="16" Padding="18"><StackPanel><TextBlock Text="АКТИВНАЯ СТРАТЕГИЯ" FontSize="10" Foreground="{StaticResource Muted}"/><TextBlock x:Name="ActiveStrategy" Text="Balanced" FontSize="18" FontWeight="SemiBold" Margin="0,6,0,2"/><TextBlock x:Name="ActiveDetail" Text="TLS + HTTP + QUIC" Foreground="{StaticResource Muted}" FontSize="12"/></StackPanel></Border>
+          </Grid>
+        </Border>
+        <UniformGrid Grid.Row="2" Columns="3">
+          <Border Background="{StaticResource Surface}" CornerRadius="18" Margin="0,0,10,0" Padding="20"><StackPanel><TextBlock Text="ENGINE" Foreground="{StaticResource Muted}" FontSize="10"/><TextBlock x:Name="EngineCard" Text="Не установлен" FontSize="19" FontWeight="SemiBold" Margin="0,7,0,3"/><TextBlock Text="Официальный zapret2 bundle" Foreground="{StaticResource Muted}" FontSize="12"/></StackPanel></Border>
+          <Border Background="{StaticResource Surface}" CornerRadius="18" Margin="5,0,5,0" Padding="20"><StackPanel><TextBlock Text="VPN GATEWAY" Foreground="{StaticResource Muted}" FontSize="10"/><TextBlock x:Name="GatewayCard" Text="Выключен" FontSize="19" FontWeight="SemiBold" Margin="0,7,0,3"/><TextBlock Text="WireGuard • телефон → ПК" Foreground="{StaticResource Muted}" FontSize="12"/></StackPanel></Border>
+          <Border Background="{StaticResource Surface}" CornerRadius="18" Margin="10,0,0,0" Padding="20"><StackPanel><TextBlock Text="РЕЖИМ" Foreground="{StaticResource Muted}" FontSize="10"/><TextBlock Text="Windows x64" FontSize="19" FontWeight="SemiBold" Margin="0,7,0,3"/><TextBlock Text="Self-contained .NET 9" Foreground="{StaticResource Muted}" FontSize="12"/></StackPanel></Border>
+        </UniformGrid>
+      </Grid>
+
+      <Grid x:Name="StrategiesPage" Visibility="Collapsed">
+        <StackPanel><TextBlock Text="Стратегии" FontSize="30" FontWeight="Bold"/><TextBlock Text="Готовые профили для быстрых переключений и автоподбора." Foreground="{StaticResource Muted}" Margin="0,5,0,20"/>
+          <Border Background="{StaticResource Surface}" CornerRadius="18" Padding="20"><StackPanel>
+            <StackPanel Orientation="Horizontal"><TextBlock Text="Balanced" FontSize="19" FontWeight="SemiBold"/><Border Background="#1A2420" CornerRadius="8" Padding="8,4" Margin="10,0,0,0"><TextBlock Text="РЕКОМЕНДУЕТСЯ" Foreground="{StaticResource Success}" FontSize="10"/></Border></StackPanel><TextBlock Text="Мягкий профиль: HTTP + TLS + QUIC." Foreground="{StaticResource Muted}" Margin="0,5,0,8"/><Button Click="UseBalanced_Click" HorizontalAlignment="Left">Применить</Button>
+          </StackPanel></Border>
+          <Border Background="{StaticResource Surface}" CornerRadius="18" Padding="20" Margin="0,12,0,0"><StackPanel><TextBlock Text="Aggressive" FontSize="19" FontWeight="SemiBold"/><TextBlock Text="Более сильный профиль для сетей с жёстким DPI. Может быть тяжелее для CPU." Foreground="{StaticResource Muted}" Margin="0,5,0,8"/><Button Click="UseAggressive_Click" HorizontalAlignment="Left">Применить</Button></StackPanel></Border>
+        </StackPanel>
+      </Grid>
+
+      <Grid x:Name="GatewayPage" Visibility="Collapsed">
+        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+        <StackPanel Grid.Row="0"><TextBlock Text="VPN-шлюз" FontSize="30" FontWeight="Bold"/><TextBlock Text="Преврати этот ПК в WireGuard-шлюз для телефона. Весь трафик телефона пойдёт через интернет этого ПК." Foreground="{StaticResource Muted}" Margin="0,5,0,20"/></StackPanel>
+        <Border Grid.Row="1" Background="{StaticResource Surface}" CornerRadius="18" Padding="20"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="260"/></Grid.ColumnDefinitions><StackPanel>
+          <TextBlock Text="SERVER" FontSize="10" Foreground="{StaticResource Muted}"/><TextBlock x:Name="GatewayState" Text="Не запущен" FontSize="22" FontWeight="Bold" Margin="0,6,0,15"/><WrapPanel><StackPanel Width="170"><TextBlock Text="UDP-порт" Foreground="{StaticResource Muted}"/><TextBox x:Name="VpnPort" Text="51820"/></StackPanel><StackPanel Width="330"><TextBlock Text="Endpoint телефона" Foreground="{StaticResource Muted}"/><TextBox x:Name="VpnEndpoint"/></StackPanel></WrapPanel>
+          <StackPanel Orientation="Horizontal" Margin="-4,12,0,0"><Button Click="CreateVpn_Click" Background="{StaticResource Accent}" FontWeight="Bold">⚡ Создать и запустить</Button><Button Click="StopVpn_Click">■  Остановить</Button><Button Click="ExportVpn_Click">↓  Сохранить profile</Button></StackPanel><TextBlock x:Name="VpnInfo" TextWrapping="Wrap" Foreground="{StaticResource Muted}" Margin="0,14,0,0"/>
+        </StackPanel><Border Grid.Column="1" Background="#151A24" CornerRadius="14" Padding="15"><StackPanel><TextBlock Text="PHONE PROFILE" FontSize="10" Foreground="{StaticResource Muted}"/><Image x:Name="QrImage" Width="210" Height="210" Stretch="Uniform" Margin="0,10,0,8"/><TextBlock Text="Сканируй QR в приложении WireGuard." TextWrapping="Wrap" Foreground="{StaticResource Muted}" FontSize="11"/></StackPanel></Border></Grid></Border>
+        <Border Grid.Row="2" Background="{StaticResource Surface}" CornerRadius="18" Padding="20" Margin="0,16,0,0"><StackPanel><TextBlock Text="Как подключиться" FontSize="19" FontWeight="SemiBold"/><TextBlock Text="1. На ПК установи официальный WireGuard.  2. Нажми «Создать и запустить».  3. На телефоне WireGuard → + → Scan from QR code.  4. Если телефон не в той же Wi-Fi сети, направь UDP-порт роутера на этот ПК." Foreground="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,8,0,0"/><TextBlock Text="Важно: этот режим не является внешним VPN-сервисом — телефон выходит в интернет с публичного IP твоего домашнего/рабочего подключения." Foreground="{StaticResource Warning}" TextWrapping="Wrap" Margin="0,12,0,0"/></StackPanel></Border>
+      </Grid>
+
+      <Grid x:Name="DiagnosticsPage" Visibility="Collapsed"><StackPanel><TextBlock Text="Диагностика" FontSize="30" FontWeight="Bold"/><TextBlock Text="Состояние двигателя, прав администратора, WireGuard и локальной конфигурации." Foreground="{StaticResource Muted}" Margin="0,5,0,20"/><Border Background="{StaticResource Surface}" CornerRadius="18" Padding="20"><StackPanel><TextBlock x:Name="DiagEngine" Text="Engine: —" Margin="0,4"/><TextBlock x:Name="DiagAdmin" Text="Admin: —" Margin="0,4"/><TextBlock x:Name="DiagWireGuard" Text="WireGuard: —" Margin="0,4"/><TextBlock x:Name="DiagLan" Text="LAN: —" Margin="0,4"/><TextBlock x:Name="DiagLog" Text="Log: —" TextWrapping="Wrap" Margin="0,4,0,0" Foreground="{StaticResource Muted}"/><Button Click="RefreshDiagnostics_Click" HorizontalAlignment="Left" Margin="0,15,0,0">⟳  Обновить</Button></StackPanel></Border></StackPanel></Grid>
+      <Grid x:Name="SettingsPage" Visibility="Collapsed"><StackPanel><TextBlock Text="Настройки" FontSize="30" FontWeight="Bold"/><TextBlock Text="Базовые параметры рабочего окружения." Foreground="{StaticResource Muted}" Margin="0,5,0,20"/><Border Background="{StaticResource Surface}" CornerRadius="18" Padding="20"><StackPanel><TextBlock Text="Цель обхода" Foreground="{StaticResource Muted}"/><ComboBox x:Name="TargetBox" SelectedIndex="0"><ComboBoxItem>Автоматически</ComboBoxItem><ComboBoxItem>Discord / Telegram / YouTube</ComboBoxItem><ComboBoxItem>Весь TLS / QUIC трафик</ComboBoxItem></ComboBox><TextBlock Text="Папка данных" Foreground="{StaticResource Muted}" Margin="0,15,0,0"/><TextBox IsReadOnly="True" Text="%LOCALAPPDATA%\Zapret2Ultra"/><TextBlock Text="Движок скачивается только с официального GitHub release и проверяется по SHA-256 перед установкой." Foreground="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,12,0,0"/></StackPanel></Border></StackPanel></Grid>
+    </Grid>
+  </Grid>
+</Window>

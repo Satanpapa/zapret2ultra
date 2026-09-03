@@ -19,6 +19,7 @@
     <WarningsAsErrors>true</WarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="QRCoder" Version="1.8.0" />
     <None Update="strategies\*.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

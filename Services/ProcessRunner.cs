@@ -24,7 +24,8 @@ public static class ProcessRunner
         if (!process.Start()) throw new InvalidOperationException($"Не удалось запустить {fileName}.");
         if (stdin is not null)
         {
-            await process.StandardInput.WriteAsync(stdin, cancellationToken);
+            await process.StandardInput.WriteAsync(stdin.AsMemory(), cancellationToken);
+            await process.StandardInput.FlushAsync(cancellationToken);
             process.StandardInput.Close();
         }
         var stdoutTask = process.StandardOutput.ReadToEndAsync(cancellationToken);

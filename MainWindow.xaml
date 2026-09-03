@@ -1,0 +1,36 @@
+<Window x:Class="Zapret2Ultra.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="Zapret2Ultra" Width="1180" Height="760" MinWidth="900" MinHeight="600" WindowStartupLocation="CenterScreen" Background="{StaticResource Bg}">
+<Grid Margin="24">
+<Grid.ColumnDefinitions><ColumnDefinition Width="220"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+<StackPanel Grid.Column="0">
+<TextBlock Text="ZAPRET2ULTRA" FontSize="22" FontWeight="Bold" Margin="8,8,0,30"/>
+<Button Content="●  Главная" Click="Home_Click"/>
+<Button Content="⚡  Стратегии" Click="Strategies_Click"/>
+<Button Content="▣  VPN-шлюз" Click="Vpn_Click"/>
+<Button Content="⌁  Диагностика" Click="Diagnostics_Click"/>
+<Button Content="⚙  Настройки" Click="Settings_Click"/>
+<Border Background="#11151D" CornerRadius="12" Padding="12" Margin="4,28,4,0"><StackPanel><TextBlock Text="Система" Foreground="{StaticResource Muted}"/><TextBlock x:Name="SystemStatus" Text="Готово" FontWeight="Bold" Margin="0,5,0,0"/></StackPanel></Border>
+</StackPanel>
+<Grid Grid.Column="1" Margin="28,0,0,0">
+<StackPanel x:Name="HomePage">
+<TextBlock Text="Добро пожаловать" FontSize="34" FontWeight="Bold"/>
+<TextBlock Text="DPI bypass нового поколения · локально · без VPS" Foreground="{StaticResource Muted}" FontSize="15" Margin="0,4,0,28"/>
+<Border Background="{StaticResource Panel}" CornerRadius="20" Padding="28"><StackPanel>
+<StackPanel Orientation="Horizontal"><Ellipse Width="12" Height="12" Fill="{StaticResource Danger}" Margin="0,0,10,0"/><TextBlock Text="Обход выключен" FontSize="16" FontWeight="SemiBold"/></StackPanel>
+<TextBlock Text="Запускает выбранный движок и применяет активную стратегию." Foreground="{StaticResource Muted}" Margin="0,10,0,20"/>
+<Button Content="▶  Включить обход" Background="{StaticResource Accent}" Click="Toggle_Click" HorizontalAlignment="Left"/>
+</StackPanel></Border>
+<UniformGrid Columns="3" Margin="0,18,0,0">
+<Border Background="{StaticResource Panel}" CornerRadius="14" Padding="18" Margin="0,0,8,0"><StackPanel><TextBlock Text="Активная стратегия" Foreground="{StaticResource Muted}"/><TextBlock x:Name="StrategyText" Text="Auto" FontSize="19" FontWeight="Bold" Margin="0,6,0,0"/></StackPanel></Border>
+<Border Background="{StaticResource Panel}" CornerRadius="14" Padding="18" Margin="8,0"><StackPanel><TextBlock Text="Состояние VPN" Foreground="{StaticResource Muted}"/><TextBlock x:Name="VpnText" Text="Выключен" FontSize="19" FontWeight="Bold" Margin="0,6,0,0"/></StackPanel></Border>
+<Border Background="{StaticResource Panel}" CornerRadius="14" Padding="18" Margin="8,0,0,0"><StackPanel><TextBlock Text="Режим" Foreground="{StaticResource Muted}"/><TextBlock Text="Windows gateway" FontSize="19" FontWeight="Bold" Margin="0,6,0,0"/></StackPanel></Border>
+</UniformGrid>
+</StackPanel>
+<StackPanel x:Name="VpnPage" Visibility="Collapsed">
+<TextBlock Text="VPN-шлюз" FontSize="34" FontWeight="Bold"/><TextBlock Text="Подключайте телефон к этому ПК и маршрутизируйте его трафик через локальный обход." Foreground="{StaticResource Muted}" FontSize="15" Margin="0,4,0,24"/>
+<Border Background="{StaticResource Panel}" CornerRadius="20" Padding="24"><StackPanel>
+<TextBlock Text="WireGuard gateway" FontSize="20" FontWeight="Bold"/><TextBlock Text="Сервер работает на этом ПК. Zapret2Ultra остаётся точкой выхода в интернет." Foreground="{StaticResource Muted}" Margin="0,8,0,18"/>
+<StackPanel Orientation="Horizontal"><TextBlock Text="Порт" VerticalAlignment="Center"/><TextBox x:Name="VpnPort" Text="51820" Width="100" Margin="12,0" Padding="8"/><Button Content="Создать конфигурацию" Click="CreateVpn_Click"/></StackPanel>
+<TextBlock x:Name="VpnInfo" Text="После генерации здесь появятся адрес, ключи и QR-конфигурация клиента." Foreground="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,18,0,0"/>
+</StackPanel></Border>
+</StackPanel>
+</Grid></Grid></Window>

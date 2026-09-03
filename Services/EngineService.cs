@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.IO;
 using System.IO.Compression;
 using System.Net.Http;
 using System.Security.Cryptography;
@@ -9,7 +10,7 @@ public sealed class EngineService
 {
     private const string Version = "1.0.5";
     private const string ZipUrl = "https://github.com/bol-van/zapret2/releases/download/v1.0.5/zapret2-v1.0.5.zip";
-    private const string ZipSha256 = "d73a4c57dad0f20f473aa62ed950505f0737154c3d9ab8fca717e75f1a21fa69";
+    private const string ZipSha256 = "d73a4c57dad0f20f4737154c3d9ab8fca717e75f1a21fa69";
     private static readonly HttpClient Http = new() { Timeout = TimeSpan.FromMinutes(5) };
     private readonly string _root = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Zapret2Ultra");
     private Process? _process;
@@ -42,18 +43,24 @@ public sealed class EngineService
         }
         var temp = Path.Combine(_root, $"extract-{Guid.NewGuid():N}");
         Directory.CreateDirectory(temp);
-        ZipFile.ExtractToDirectory(archive, temp);
-        var exe = FindFile(temp, "winws2.exe") ?? throw new FileNotFoundException("winws2.exe не найден в официальном архиве.");
-        var exeDir = Path.GetDirectoryName(exe)!;
-        foreach (var sourceFile in Directory.EnumerateFiles(exeDir, "*", SearchOption.TopDirectoryOnly))
-            File.Copy(sourceFile, Path.Combine(EngineDirectory, Path.GetFileName(sourceFile)), true);
-        foreach (var dir in new[] { "lua", "files", "windivert.filter" })
+        try
         {
-            var found = Directory.EnumerateDirectories(temp, dir, SearchOption.AllDirectories).FirstOrDefault();
-            if (found is not null) CopyDirectory(found, Path.Combine(EngineDirectory, dir));
+            ZipFile.ExtractToDirectory(archive, temp);
+            var exe = FindFile(temp, "winws2.exe") ?? throw new FileNotFoundException("winws2.exe не найден в официальном архиве.");
+            var exeDir = Path.GetDirectoryName(exe)!;
+            foreach (var sourceFile in Directory.EnumerateFiles(exeDir, "*", SearchOption.TopDirectoryOnly))
+                File.Copy(sourceFile, Path.Combine(EngineDirectory, Path.GetFileName(sourceFile)), true);
+            foreach (var dir in new[] { "lua", "files", "windivert.filter" })
+            {
+                var found = Directory.EnumerateDirectories(temp, dir, SearchOption.AllDirectories).FirstOrDefault();
+                if (found is not null) CopyDirectory(found, Path.Combine(EngineDirectory, dir));
+            }
         }
-        Directory.Delete(temp, true);
-        File.Delete(archive);
+        finally
+        {
+            if (Directory.Exists(temp)) Directory.Delete(temp, true);
+            if (File.Exists(archive)) File.Delete(archive);
+        }
         Log?.Invoke("Движок установлен и проверен.");
     }
 

@@ -30,25 +30,27 @@ public sealed class EngineService
         await using (var source = await Http.GetStreamAsync(ZipUrl, cancellationToken))
         await using (var target = File.Create(archive))
             await source.CopyToAsync(target, cancellationToken);
-        var hash = Convert.ToHexString(await SHA256.HashDataAsync(File.OpenRead(archive), cancellationToken)).ToLowerInvariant();
-        if (!CryptographicOperations.FixedTimeEquals(Convert.FromHexString(hash), Convert.FromHexString(ZipSha256)))
+        await using (var file = File.OpenRead(archive))
         {
-            File.Delete(archive);
-            throw new InvalidOperationException("SHA-256 движка не совпадает с опубликованным значением.");
+            var actual = await SHA256.HashDataAsync(file, cancellationToken);
+            var expected = Convert.FromHexString(ZipSha256);
+            if (!CryptographicOperations.FixedTimeEquals(actual, expected))
+            {
+                File.Delete(archive);
+                throw new InvalidOperationException("SHA-256 движка не совпадает с опубликованным значением.");
+            }
         }
         var temp = Path.Combine(_root, $"extract-{Guid.NewGuid():N}");
         Directory.CreateDirectory(temp);
         ZipFile.ExtractToDirectory(archive, temp);
         var exe = FindFile(temp, "winws2.exe") ?? throw new FileNotFoundException("winws2.exe не найден в официальном архиве.");
-        foreach (var sourceFile in Directory.EnumerateFiles(Path.GetDirectoryName(exe)!, "*", SearchOption.TopDirectoryOnly))
-        {
+        var exeDir = Path.GetDirectoryName(exe)!;
+        foreach (var sourceFile in Directory.EnumerateFiles(exeDir, "*", SearchOption.TopDirectoryOnly))
             File.Copy(sourceFile, Path.Combine(EngineDirectory, Path.GetFileName(sourceFile)), true);
-        }
         foreach (var dir in new[] { "lua", "files", "windivert.filter" })
         {
             var found = Directory.EnumerateDirectories(temp, dir, SearchOption.AllDirectories).FirstOrDefault();
-            if (found is null) continue;
-            CopyDirectory(found, Path.Combine(EngineDirectory, dir));
+            if (found is not null) CopyDirectory(found, Path.Combine(EngineDirectory, dir));
         }
         Directory.Delete(temp, true);
         File.Delete(archive);
@@ -59,8 +61,7 @@ public sealed class EngineService
     {
         if (IsRunning) return;
         await EnsureInstalledAsync(cancellationToken);
-        var lua = Path.Combine(EngineDirectory, "lua");
-        var args = BuildArguments(strategy, lua, EngineDirectory);
+        var args = BuildArguments(strategy, EngineDirectory);
         var psi = new ProcessStartInfo(EnginePath)
         {
             WorkingDirectory = EngineDirectory,
@@ -76,7 +77,7 @@ public sealed class EngineService
         if (!_process.Start()) throw new InvalidOperationException("Не удалось запустить winws2.");
         _process.BeginOutputReadLine();
         _process.BeginErrorReadLine();
-        await Task.Delay(400, cancellationToken);
+        await Task.Delay(500, cancellationToken);
         if (_process.HasExited)
         {
             var code = _process.ExitCode;
@@ -106,8 +107,9 @@ public sealed class EngineService
         }
     }
 
-    private static IReadOnlyList<string> BuildArguments(string strategy, string lua, string root)
+    private static IReadOnlyList<string> BuildArguments(string strategy, string root)
     {
+        var lua = Path.Combine(root, "lua");
         var lib = Path.Combine(lua, "zapret-lib.lua");
         var antidpi = Path.Combine(lua, "zapret-antidpi.lua");
         var quic = FindFile(root, "quic_initial_www_google_com.bin");
@@ -149,6 +151,7 @@ public sealed class EngineService
             args.Add("--filter-l7=quic");
             args.Add("--payload=quic_initial");
             args.Add("--lua-desync=fake:blob=quic_google:repeats=11");
+            args.Add("--new");
         }
         if (Directory.Exists(filterDir))
         {
@@ -159,7 +162,11 @@ public sealed class EngineService
             }
         }
         if (strategy.Equals("aggressive", StringComparison.OrdinalIgnoreCase))
-            args.Add("--filter-l7=wireguard,stun,discord --payload=wireguard_initiation,wireguard_cookie,stun,discord_ip_discovery --lua-desync=fake:blob=0x00000000000000000000000000000000:repeats=2");
+        {
+            args.Add("--filter-l7=wireguard,stun,discord");
+            args.Add("--payload=wireguard_initiation,wireguard_cookie,stun,discord_ip_discovery");
+            args.Add("--lua-desync=fake:blob=0x00000000000000000000000000000000:repeats=2");
+        }
         return args;
     }
 

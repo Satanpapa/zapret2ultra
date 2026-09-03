@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Text;
 
 namespace Zapret2Ultra.Services;
 
@@ -25,11 +24,11 @@ public static class ProcessRunner
         if (!process.Start()) throw new InvalidOperationException($"Не удалось запустить {fileName}.");
         if (stdin is not null)
         {
-            await process.StandardInput.WriteAsync(stdin);
+            await process.StandardInput.WriteAsync(stdin, cancellationToken);
             process.StandardInput.Close();
         }
-        var stdoutTask = process.StandardOutput.ReadToEndAsync(cancellationToken).AsTask();
-        var stderrTask = process.StandardError.ReadToEndAsync(cancellationToken).AsTask();
+        var stdoutTask = process.StandardOutput.ReadToEndAsync(cancellationToken);
+        var stderrTask = process.StandardError.ReadToEndAsync(cancellationToken);
         await process.WaitForExitAsync(cancellationToken);
         return new ProcessResult(process.ExitCode, await stdoutTask, await stderrTask);
     }
